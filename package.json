@@ -1,0 +1,34 @@
+{
+  "name": "claude-voicevox-tts",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Claude Code の応答を VOICEVOX で読み上げる Hook",
+  "scripts": {
+    "prepare": "husky",
+    "speak": "node src/cli.mjs",
+    "speakers": "node src/cli.mjs --speakers",
+    "status": "node src/cli.mjs --status",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "secretlint": "secretlint --secretlintrc .secretlintrc.json \"**/*\""
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
+    "@eslint/js": "^9.0.0",
+    "@secretlint/secretlint-rule-preset-recommend": "^8.0.0",
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
+    "prettier": "^3.0.0",
+    "secretlint": "^8.0.0",
+    "vitest": "^2.0.0"
+  },
+  "allowScripts": {
+    "esbuild@0.21.5": true
+  }
+}

@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+__pycache__/
+venv/
+
+# env
+.env
+.env.local
+
+# build output
+dist/
+build/
+.next/
+coverage/
+
+# logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# editor (settings.json / extensions.json は共有するためコミットする)
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+
+# husky internal files (pre-commit フック本体はコミットする)
+.husky/_/
