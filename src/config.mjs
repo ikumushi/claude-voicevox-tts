@@ -78,6 +78,19 @@ export function readBoolean(raw, fallback) {
   return !['0', 'false', 'off', 'no'].includes(String(raw).trim().toLowerCase());
 }
 
+/**
+ * 応答のどこを読み上げるか。
+ * `summary` … 末尾の「まとめ・サマリ・結論」節だけ(節が無ければ応答全体)
+ * `full`    … 応答全体
+ */
+export function readScope(raw) {
+  return String(raw ?? '')
+    .trim()
+    .toLowerCase() === 'full'
+    ? 'full'
+    : 'summary';
+}
+
 /** 一時ファイル置き場。合成したWAVとプロセスIDの記録をここに置く。 */
 export function workDir(env = process.env) {
   return path.join(env.CLAUDE_VOICEVOX_TMP ?? os.tmpdir(), 'claude-voicevox');
@@ -92,6 +105,7 @@ export function loadConfig(env = process.env) {
     pitchScale: readNumber(env.VOICEVOX_PITCH, 0, { min: -0.15, max: 0.15 }),
     intonationScale: readNumber(env.VOICEVOX_INTONATION, 1, { min: 0, max: 2 }),
     volumeScale: readNumber(env.VOICEVOX_VOLUME, 1, { min: 0, max: 2 }),
+    readScope: readScope(env.VOICEVOX_READ_SCOPE),
     maxChars: readNumber(env.VOICEVOX_MAX_CHARS, DEFAULT_MAX_CHARS, { min: 20, max: 5000 }),
     requestTimeoutMs: readNumber(env.VOICEVOX_REQUEST_TIMEOUT_MS, 30_000, { min: 1000 }),
     engineBootTimeoutMs: readNumber(

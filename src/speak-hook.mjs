@@ -21,6 +21,7 @@ import { loadConfig } from './config.mjs';
 import { extractFinalAssistantText, toNotificationSpeech } from './extract.mjs';
 import { toSpeakableText } from './normalize.mjs';
 import { ensureWorkDir } from './play.mjs';
+import { extractSummarySection } from './section.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 
@@ -53,7 +54,14 @@ function buildStopSpeech(payload, config) {
     return '';
   }
   const lines = fs.readFileSync(transcriptPath, 'utf8').split('\n');
-  return toSpeakableText(extractFinalAssistantText(lines), { maxChars: config.maxChars });
+  const response = extractFinalAssistantText(lines);
+
+  // サマリ節だけを読む設定でも、節が無い応答(短い返答や質問への回答)は
+  // 黙ってしまうと不便なので応答全体に戻す。
+  const body =
+    config.readScope === 'summary' ? extractSummarySection(response) || response : response;
+
+  return toSpeakableText(body, { maxChars: config.maxChars });
 }
 
 /**

@@ -2,8 +2,12 @@
 
 Claude Code の応答を [VOICEVOX](https://voicevox.hiroshiba.jp/) で読み上げる Hook。
 
-ターンが終わると、その応答の本文を自動で読み上げる。コードブロック・表・URL・長いパスは
-聞いても分からないので落としてから読む。ツールの実行許可を待って止まったときも声で知らせる。
+ターンが終わると、その応答の末尾にある「まとめ・サマリ・結論」節を自動で読み上げる。
+コードブロック・表・URL・長いパスは聞いても分からないので落としてから読む。
+ツールの実行許可を待って止まったときも声で知らせる。
+
+まとめ節が無い応答(短い返答や質問への回答)は、黙ってしまうと不便なので応答全体を読む。
+応答全体を常に読みたい場合は `VOICEVOX_READ_SCOPE=full` にする。
 
 ## 前提
 
@@ -86,20 +90,21 @@ npm run speakers
 
 ## 設定(環境変数)
 
-| 変数                              | 既定値                   | 意味                                             |
-| --------------------------------- | ------------------------ | ------------------------------------------------ |
-| `VOICEVOX_ENABLED`                | `1`                      | `0` にすると読み上げを止める(一時的に黙らせる用) |
-| `VOICEVOX_SPEAKER`                | `2`                      | 話者ID。`npm run speakers` で一覧が出る          |
-| `VOICEVOX_SPEED`                  | `1.2`                    | 読み上げ速度(0.5〜2.0)                           |
-| `VOICEVOX_PITCH`                  | `0`                      | 声の高さ(-0.15〜0.15)                            |
-| `VOICEVOX_INTONATION`             | `1`                      | 抑揚の強さ(0〜2)                                 |
-| `VOICEVOX_VOLUME`                 | `1`                      | 音量(0〜2)                                       |
-| `VOICEVOX_MAX_CHARS`              | `400`                    | 読み上げる最大文字数。超えたら文末で打ち切る     |
-| `VOICEVOX_SPEAK_NOTIFICATIONS`    | `1`                      | 許可待ちなどの通知を読み上げるか                 |
-| `VOICEVOX_URL`                    | `http://127.0.0.1:50021` | エンジンの待ち受け先                             |
-| `VOICEVOX_AUTOSTART`              | `1`                      | エンジンが止まっていたら自動起動するか           |
-| `VOICEVOX_ENGINE_EXE`             | (自動探索)               | エンジンの `run.exe` を明示指定する              |
-| `VOICEVOX_ENGINE_BOOT_TIMEOUT_MS` | `90000`                  | 自動起動したエンジンの応答を待つ上限             |
+| 変数                              | 既定値                   | 意味                                              |
+| --------------------------------- | ------------------------ | ------------------------------------------------- |
+| `VOICEVOX_ENABLED`                | `1`                      | `0` にすると読み上げを止める(一時的に黙らせる用)  |
+| `VOICEVOX_READ_SCOPE`             | `summary`                | `summary` は末尾のまとめ節だけ、`full` は応答全体 |
+| `VOICEVOX_SPEAKER`                | `2`                      | 話者ID。`npm run speakers` で一覧が出る           |
+| `VOICEVOX_SPEED`                  | `1.2`                    | 読み上げ速度(0.5〜2.0)                            |
+| `VOICEVOX_PITCH`                  | `0`                      | 声の高さ(-0.15〜0.15)                             |
+| `VOICEVOX_INTONATION`             | `1`                      | 抑揚の強さ(0〜2)                                  |
+| `VOICEVOX_VOLUME`                 | `1`                      | 音量(0〜2)                                        |
+| `VOICEVOX_MAX_CHARS`              | `400`                    | 読み上げる最大文字数。超えたら文末で打ち切る      |
+| `VOICEVOX_SPEAK_NOTIFICATIONS`    | `1`                      | 許可待ちなどの通知を読み上げるか                  |
+| `VOICEVOX_URL`                    | `http://127.0.0.1:50021` | エンジンの待ち受け先                              |
+| `VOICEVOX_AUTOSTART`              | `1`                      | エンジンが止まっていたら自動起動するか            |
+| `VOICEVOX_ENGINE_EXE`             | (自動探索)               | エンジンの `run.exe` を明示指定する               |
+| `VOICEVOX_ENGINE_BOOT_TIMEOUT_MS` | `90000`                  | 自動起動したエンジンの応答を待つ上限              |
 
 ### 読み上げにかかる時間の実測
 
@@ -128,6 +133,8 @@ Claude Code ──(Stop / Notification Hook)──> speak-hook.mjs
 - `src/speak.mjs` … 切り離されたワーカー。エンジンの起動確認・音声合成・再生を担当する。
 - `src/extract.mjs` … トランスクリプト(JSONL)から最終応答を取り出す。ツール実行の合間の
   中間コメントとサブエージェントの発言は読まない。
+- `src/section.mjs` … 応答から「まとめ・サマリ・結論」節だけを切り出す。
+  次の見出し(「次にできること」など)が来たらそこで切る。
 - `src/normalize.mjs` … Markdown を読み上げ用のテキストに直す。
 - `src/engine.mjs` … VOICEVOX ENGINE の HTTP API 呼び出しとエンジンの自動起動。
 - `src/play.mjs` … WAV の再生と、前のターンの読み上げを止める処理。
