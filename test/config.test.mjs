@@ -15,19 +15,19 @@ describe('loadConfig', () => {
     const config = loadConfig({});
     expect(config.enabled).toBe(true);
     expect(config.url).toBe('http://127.0.0.1:50021');
-    expect(config.speaker).toBe(3);
+    expect(config.speaker).toBe(2);
     expect(config.speedScale).toBe(1.2);
     expect(config.maxChars).toBe(400);
   });
 
   it('環境変数で上書きできる', () => {
     const config = loadConfig({
-      VOICEVOX_SPEAKER: '2',
+      VOICEVOX_SPEAKER: '8',
       VOICEVOX_SPEED: '1.5',
       VOICEVOX_MAX_CHARS: '200',
       VOICEVOX_URL: 'http://127.0.0.1:50022/',
     });
-    expect(config.speaker).toBe(2);
+    expect(config.speaker).toBe(8);
     expect(config.speedScale).toBe(1.5);
     expect(config.maxChars).toBe(200);
     expect(config.url).toBe('http://127.0.0.1:50022');

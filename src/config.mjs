@@ -11,8 +11,8 @@ import path from 'node:path';
 /** VOICEVOX ENGINE の既定の待ち受け先。 */
 const DEFAULT_URL = 'http://127.0.0.1:50021';
 
-/** 既定の話者。3 = ずんだもん(ノーマル)。`npm run speakers` で一覧が出る。 */
-const DEFAULT_SPEAKER = 3;
+/** 既定の話者。2 = 四国めたん(ノーマル)。`npm run speakers` で一覧が出る。 */
+const DEFAULT_SPEAKER = 2;
 
 /** 読み上げ速度。1.0が標準。作業中のお供なので少し速めを既定にしている。 */
 const DEFAULT_SPEED = 1.2;

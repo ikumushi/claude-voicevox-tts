@@ -51,7 +51,7 @@ npm run speakers
 ```json
 {
   "env": {
-    "VOICEVOX_SPEAKER": "3",
+    "VOICEVOX_SPEAKER": "2",
     "VOICEVOX_SPEED": "1.2",
     "VOICEVOX_MAX_CHARS": "400"
   },
@@ -89,7 +89,7 @@ npm run speakers
 | 変数                              | 既定値                   | 意味                                             |
 | --------------------------------- | ------------------------ | ------------------------------------------------ |
 | `VOICEVOX_ENABLED`                | `1`                      | `0` にすると読み上げを止める(一時的に黙らせる用) |
-| `VOICEVOX_SPEAKER`                | `3`                      | 話者ID。`npm run speakers` で一覧が出る          |
+| `VOICEVOX_SPEAKER`                | `2`                      | 話者ID。`npm run speakers` で一覧が出る          |
 | `VOICEVOX_SPEED`                  | `1.2`                    | 読み上げ速度(0.5〜2.0)                           |
 | `VOICEVOX_PITCH`                  | `0`                      | 声の高さ(-0.15〜0.15)                            |
 | `VOICEVOX_INTONATION`             | `1`                      | 抑揚の強さ(0〜2)                                 |
