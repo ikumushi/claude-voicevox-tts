@@ -17,8 +17,13 @@ const DEFAULT_SPEAKER = 3;
 /** 読み上げ速度。1.0が標準。作業中のお供なので少し速めを既定にしている。 */
 const DEFAULT_SPEED = 1.2;
 
-/** 1回に読み上げる最大文字数。これを超えたら文の区切りで打ち切る。 */
-const DEFAULT_MAX_CHARS = 400;
+/**
+ * 1回に読み上げる最大文字数。これを超えたら文の区切りで打ち切る。
+ *
+ * 実測(速度1.2・ずんだもん)で1文字あたり約147ミリ秒なので、150文字で約22秒。
+ * 400文字だと約59秒かかり、作業中に聞き続けるには長すぎた。
+ */
+const DEFAULT_MAX_CHARS = 150;
 
 /** エンジンが起きるのを待つ上限(ミリ秒)。GPU版は初回のモデル読み込みが長い。 */
 const DEFAULT_ENGINE_BOOT_TIMEOUT_MS = 90_000;
@@ -33,6 +38,28 @@ export function engineExeCandidates(env = process.env) {
     programFiles && path.join(programFiles, 'VOICEVOX', 'vv-engine', 'run.exe'),
     local && path.join(local, 'Programs', 'VOICEVOX', 'VOICEVOX.exe'),
   ].filter((candidate) => typeof candidate === 'string' && candidate.length > 0);
+}
+
+/**
+ * winget でインストールした場合の置き場。
+ * `winget install HiroshibaKazuyuki.VOICEVOX` はインストーラを走らせずzipを展開するだけなので、
+ * `Programs\VOICEVOX` ではなく WinGet のパッケージ配下に入る。
+ */
+export function wingetPackagesDir(env = process.env) {
+  if (!env.LOCALAPPDATA) return null;
+  return path.join(env.LOCALAPPDATA, 'Microsoft', 'WinGet', 'Packages');
+}
+
+/**
+ * WinGet のパッケージフォルダ名一覧から、エンジンの候補パスを組み立てる。
+ * フォルダ名には識別子が付く(例: `HiroshibaKazuyuki.VOICEVOX_Microsoft.Winget.Source_8wekyb3d8bbwe`)
+ * ため決め打ちできず、名前に VOICEVOX を含むものを拾う。
+ */
+export function wingetEngineCandidates(entryNames, packagesDir) {
+  if (!packagesDir || !Array.isArray(entryNames)) return [];
+  return entryNames
+    .filter((name) => typeof name === 'string' && /voicevox/i.test(name))
+    .map((name) => path.join(packagesDir, name, 'VOICEVOX', 'vv-engine', 'run.exe'));
 }
 
 /** 数値の環境変数を読む。壊れていたら既定値に戻す(読み上げのために止まる必要はない)。 */
@@ -74,6 +101,7 @@ export function loadConfig(env = process.env) {
     autostartEngine: readBoolean(env.VOICEVOX_AUTOSTART, true),
     speakNotifications: readBoolean(env.VOICEVOX_SPEAK_NOTIFICATIONS, true),
     engineExeCandidates: engineExeCandidates(env),
+    wingetPackagesDir: wingetPackagesDir(env),
     workDir: workDir(env),
   };
 }

@@ -103,6 +103,12 @@ describe('truncateAtSentence', () => {
     expect(truncateAtSentence('短い文。', 100)).toBe('短い文。');
   });
 
+  it('文末で切れたときに句点を重ねない', () => {
+    const result = truncateAtSentence('あいうえお。かきくけこ。さしすせそ。', 12);
+    expect(result).toBe('あいうえお。かきくけこ。以下は省略します。');
+    expect(result).not.toContain('。。');
+  });
+
   it('文の区切りが近くに無ければそのまま切る', () => {
     const result = truncateAtSentence('あ'.repeat(100), 20);
     expect(result).toBe('あ'.repeat(20) + '。以下は省略します。');

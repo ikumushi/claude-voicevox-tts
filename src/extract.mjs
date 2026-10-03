@@ -11,9 +11,16 @@ function isOwnAssistantEntry(entry) {
   return entry?.type === 'assistant' && entry.isSidechain !== true;
 }
 
-/** そのイベントがターンの境界(ユーザー入力かツール結果)かどうか。 */
+/**
+ * そのイベントがターンの境界かどうか。
+ *
+ * 境界は `user` だけ(ユーザーの入力、またはツールの実行結果)。
+ * トランスクリプトには `system` `attachment` `atis-latch` `bridge-session` のような
+ * 記録用のイベントが応答の後ろに混ざる。これらを境界にすると最終応答に届かないので、
+ * 境界にはせず読み飛ばす。実際に最終行が `system` のトランスクリプトで空振りした。
+ */
 function isTurnBoundary(entry) {
-  return entry?.type === 'user' || entry?.type === 'system';
+  return entry?.type === 'user';
 }
 
 /**

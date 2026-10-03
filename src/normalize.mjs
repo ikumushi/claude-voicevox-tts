@@ -54,8 +54,12 @@ export function truncateAtSentence(text, maxChars) {
     head.lastIndexOf('！'),
     head.lastIndexOf('？'),
   );
-  const body = lastBreak >= Math.floor(maxChars * 0.4) ? head.slice(0, lastBreak + 1) : head;
-  return `${body.trimEnd()}。以下は省略します。`;
+  const body = (lastBreak >= Math.floor(maxChars * 0.4) ? head.slice(0, lastBreak + 1) : head)
+    .trimEnd()
+    // 文末で切れた場所に句点を足すと「。。」になるので、足すのは文中で切れたときだけ。
+    .replace(/[。!?！？]$/, '。');
+  const ending = /[。!?！？]$/.test(body) ? '' : '。';
+  return `${body}${ending}以下は省略します。`;
 }
 
 export function toSpeakableText(markdown, { maxChars = 400 } = {}) {

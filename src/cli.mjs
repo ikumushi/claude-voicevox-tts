@@ -7,8 +7,16 @@
  *   node src/cli.mjs --status          … エンジンの状態を見る
  */
 
+import fs from 'node:fs';
+
 import { loadConfig } from './config.mjs';
-import { ensureEngineRunning, fetchSpeakers, fetchVersion, synthesizeWav } from './engine.mjs';
+import {
+  ensureEngineRunning,
+  fetchSpeakers,
+  fetchVersion,
+  findEngineExe,
+  synthesizeWav,
+} from './engine.mjs';
 import {
   cleanupStaleWavFiles,
   playWavFile,
@@ -25,10 +33,7 @@ async function printStatus(config) {
   console.log(`速度    : ${config.speedScale}`);
   console.log(`上限    : ${config.maxChars}文字`);
   console.log(`一時置き場: ${config.workDir}`);
-  if (!version) {
-    const candidates = config.engineExeCandidates;
-    console.log(`自動起動候補: ${candidates.length > 0 ? candidates.join(', ') : 'なし'}`);
-  }
+  console.log(`エンジン実体: ${findEngineExe(config) ?? '見つからない'}`);
 }
 
 async function printSpeakers(config) {
@@ -51,8 +56,16 @@ async function speak(config, text) {
   await takeOverPlayback(config.workDir);
   cleanupStaleWavFiles(config.workDir);
   const wavPath = writeWavFile(config.workDir, await synthesizeWav(config, text));
-  await playWavFile(wavPath);
-  releasePlayback(config.workDir);
+  try {
+    await playWavFile(wavPath);
+  } finally {
+    try {
+      fs.unlinkSync(wavPath);
+    } catch {
+      // 掃除は cleanupStaleWavFiles が後で引き受ける。
+    }
+    releasePlayback(config.workDir);
+  }
 }
 
 async function main() {

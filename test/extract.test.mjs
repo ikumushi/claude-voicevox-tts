@@ -59,6 +59,32 @@ describe('extractFinalAssistantText', () => {
     expect(extractFinalAssistantText(lines)).toBe('答えです。');
   });
 
+  it('応答より後ろの記録用イベントを読み飛ばす', () => {
+    // 実際のトランスクリプトは最終応答のあとに system / attachment などが並ぶ。
+    const lines = [
+      user('やって'),
+      JSON.stringify({ type: 'attachment', isSidechain: false }),
+      assistant([{ type: 'text', text: '終わりました。' }]),
+      JSON.stringify({ type: 'system', isSidechain: false }),
+      JSON.stringify({ type: 'atis-latch' }),
+      JSON.stringify({ type: 'bridge-session' }),
+    ];
+    expect(extractFinalAssistantText(lines)).toBe('終わりました。');
+  });
+
+  it('記録用イベントを挟んでもツール呼び出しより前には戻らない', () => {
+    const lines = [
+      user('やって'),
+      assistant([{ type: 'text', text: '中間コメント。' }]),
+      assistant([{ type: 'tool_use', name: 'Bash' }]),
+      user('tool result'),
+      JSON.stringify({ type: 'attachment' }),
+      assistant([{ type: 'text', text: '最終応答。' }]),
+      JSON.stringify({ type: 'system' }),
+    ];
+    expect(extractFinalAssistantText(lines)).toBe('最終応答。');
+  });
+
   it('壊れた行は読み飛ばす', () => {
     const lines = [user('やって'), assistant([{ type: 'text', text: '応答。' }]), '{ broken json'];
     expect(extractFinalAssistantText(lines)).toBe('応答。');

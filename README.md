@@ -53,7 +53,7 @@ npm run speakers
   "env": {
     "VOICEVOX_SPEAKER": "3",
     "VOICEVOX_SPEED": "1.2",
-    "VOICEVOX_MAX_CHARS": "400"
+    "VOICEVOX_MAX_CHARS": "150"
   },
   "hooks": {
     "Stop": [
@@ -94,12 +94,24 @@ npm run speakers
 | `VOICEVOX_PITCH`                  | `0`                      | 声の高さ(-0.15〜0.15)                            |
 | `VOICEVOX_INTONATION`             | `1`                      | 抑揚の強さ(0〜2)                                 |
 | `VOICEVOX_VOLUME`                 | `1`                      | 音量(0〜2)                                       |
-| `VOICEVOX_MAX_CHARS`              | `400`                    | 読み上げる最大文字数。超えたら文末で打ち切る     |
+| `VOICEVOX_MAX_CHARS`              | `150`                    | 読み上げる最大文字数。超えたら文末で打ち切る     |
 | `VOICEVOX_SPEAK_NOTIFICATIONS`    | `1`                      | 許可待ちなどの通知を読み上げるか                 |
 | `VOICEVOX_URL`                    | `http://127.0.0.1:50021` | エンジンの待ち受け先                             |
 | `VOICEVOX_AUTOSTART`              | `1`                      | エンジンが止まっていたら自動起動するか           |
 | `VOICEVOX_ENGINE_EXE`             | (自動探索)               | エンジンの `run.exe` を明示指定する              |
 | `VOICEVOX_ENGINE_BOOT_TIMEOUT_MS` | `90000`                  | 自動起動したエンジンの応答を待つ上限             |
+
+### 読み上げにかかる時間の実測
+
+ずんだもん(話者3)で100文字を合成して計測した結果。文字数の上限を決める目安に使う。
+
+| 速度  | 100文字 | 150文字 | 400文字 |
+| ----- | ------- | ------- | ------- |
+| `1.0` | 17.6秒  | 26秒    | 71秒    |
+| `1.2` | 14.7秒  | 22秒    | 59秒    |
+| `1.5` | 11.7秒  | 18秒    | 47秒    |
+
+既定を150文字にしているのはこの実測から。400文字では1ターンに1分近く話し続けてしまう。
 
 ## 仕組み
 
@@ -126,13 +138,13 @@ Claude Code ──(Stop / Notification Hook)──> speak-hook.mjs
 
 ## 困ったとき
 
-| 症状                     | 確認すること                                                                |
-| ------------------------ | --------------------------------------------------------------------------- |
-| 何も聞こえない           | `npm run status` でエンジンが起動中か。`VOICEVOX_ENABLED` が `0` でないか   |
-| エンジンが自動起動しない | `npm run status` の「自動起動候補」を見て、`VOICEVOX_ENGINE_EXE` を設定する |
-| 読み上げが長すぎる       | `VOICEVOX_MAX_CHARS` を小さくする(例: `150`)                                |
-| 声を変えたい             | `npm run speakers` でIDを調べ、`VOICEVOX_SPEAKER` に設定する                |
-| Hook のエラーを見たい    | Claude Code を `--debug` で起動する。Hook のログは標準エラーに出る          |
+| 症状                     | 確認すること                                                                               |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| 何も聞こえない           | `npm run status` でエンジンが起動中か。`VOICEVOX_ENABLED` が `0` でないか                  |
+| エンジンが自動起動しない | `npm run status` の「エンジン実体」が「見つからない」なら `VOICEVOX_ENGINE_EXE` を設定する |
+| 読み上げが長すぎる       | `VOICEVOX_MAX_CHARS` を小さくする(例: `100`)。上の実測表を参照                             |
+| 声を変えたい             | `npm run speakers` でIDを調べ、`VOICEVOX_SPEAKER` に設定する                               |
+| Hook のエラーを見たい    | Claude Code を `--debug` で起動する。Hook のログは標準エラーに出る                         |
 
 ## 開発
 

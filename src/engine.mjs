@@ -10,8 +10,32 @@
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 
+import { wingetEngineCandidates } from './config.mjs';
+
 function log(message) {
   process.stderr.write(`[voicevox] ${message}\n`);
+}
+
+/**
+ * エンジンの実行ファイルを探す。
+ * 決め打ちの候補を先に見て、見つからなければ winget の置き場を走査する。
+ */
+export function findEngineExe(config) {
+  const direct = config.engineExeCandidates.find((candidate) => fs.existsSync(candidate));
+  if (direct) return direct;
+
+  if (!config.wingetPackagesDir) return null;
+  let entries = [];
+  try {
+    entries = fs.readdirSync(config.wingetPackagesDir);
+  } catch {
+    return null; // WinGet を使っていなければフォルダ自体が無い
+  }
+  return (
+    wingetEngineCandidates(entries, config.wingetPackagesDir).find((candidate) =>
+      fs.existsSync(candidate),
+    ) ?? null
+  );
 }
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -49,7 +73,7 @@ export async function ensureEngineRunning(config) {
     return false;
   }
 
-  const exe = config.engineExeCandidates.find((candidate) => fs.existsSync(candidate));
+  const exe = findEngineExe(config);
   if (!exe) {
     log('エンジンの実行ファイルが見つかりません。VOICEVOX_ENGINE_EXE を設定してください。');
     return false;
