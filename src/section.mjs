@@ -47,13 +47,17 @@ function collectHeadings(lines) {
 }
 
 /**
- * サマリ節の本文を返す。見出し行そのものは読み上げても意味がないので含めない。
- * 同じ階層以下の次の見出し(「次にできること」など)が来たら、そこで切る。
+ * サマリ見出し以降を返す。サマリ見出しの行そのものは、すぐ本文が続くので含めない。
+ * 一方で「次にできること」のような後続の見出しは残す。
+ * 節が切り替わったことが耳で分かるほうが聞きやすいため。
  *
  * @param {string} markdown 応答全文
- * @returns {string} サマリ節の本文(見つからなければ空文字)
+ * @param {{includeFollowing?: boolean}} options
+ *   includeFollowing が true(既定)なら応答の末尾まで。
+ *   false なら同じ階層以下の次の見出しで切り、サマリ節だけを返す。
+ * @returns {string} 切り出した本文(サマリ見出しが無ければ空文字)
  */
-export function extractSummarySection(markdown) {
+export function extractSummarySection(markdown, { includeFollowing = true } = {}) {
   if (typeof markdown !== 'string' || markdown.trim() === '') return '';
 
   const lines = markdown.split(/\r?\n/);
@@ -63,10 +67,13 @@ export function extractSummarySection(markdown) {
   const target = [...headings].reverse().find((heading) => SUMMARY_HEADING.test(heading.text));
   if (!target) return '';
 
-  const next = headings.find(
-    (heading) => heading.index > target.index && heading.level <= target.level,
-  );
-  const end = next ? next.index : lines.length;
+  let end = lines.length;
+  if (!includeFollowing) {
+    const next = headings.find(
+      (heading) => heading.index > target.index && heading.level <= target.level,
+    );
+    if (next) end = next.index;
+  }
 
   return lines
     .slice(target.index + 1, end)

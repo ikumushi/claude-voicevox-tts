@@ -20,11 +20,12 @@ const DEFAULT_SPEED = 1.2;
 /**
  * 1回に読み上げる最大文字数。これを超えたら文の区切りで打ち切る。
  *
- * 応答をほぼ全部聞きたいので400文字にしている。
- * 実測(速度1.2)で1文字あたり約147ミリ秒なので、400文字は約59秒かかる。
+ * 既定の読み上げ範囲(closing = まとめ以降すべて)は実測で520〜600文字あり、
+ * 400文字で打ち切ると末尾の作業依頼が切れてしまう。そこに余裕を持たせて800文字。
+ * 実測(速度1.2)で1文字あたり約147ミリ秒なので、600文字で約88秒かかる。
  * 短くしたいときの目安は README の実測表を参照。
  */
-const DEFAULT_MAX_CHARS = 400;
+const DEFAULT_MAX_CHARS = 800;
 
 /** エンジンが起きるのを待つ上限(ミリ秒)。GPU版は初回のモデル読み込みが長い。 */
 const DEFAULT_ENGINE_BOOT_TIMEOUT_MS = 90_000;
@@ -80,15 +81,17 @@ export function readBoolean(raw, fallback) {
 
 /**
  * 応答のどこを読み上げるか。
- * `summary` … 末尾の「まとめ・サマリ・結論」節だけ(節が無ければ応答全体)
- * `full`    … 応答全体
+ * `closing` … 「まとめ・サマリ・結論」の見出し以降すべて(既定)。
+ *             次にできること・提案・作業依頼まで読む。
+ * `summary` … まとめ節だけ。次の見出しで切る。
+ * `full`    … 応答全体。
+ * いずれもサマリ見出しが無い応答は応答全体に戻す(無音を避ける)。
  */
 export function readScope(raw) {
-  return String(raw ?? '')
+  const value = String(raw ?? '')
     .trim()
-    .toLowerCase() === 'full'
-    ? 'full'
-    : 'summary';
+    .toLowerCase();
+  return ['closing', 'summary', 'full'].includes(value) ? value : 'closing';
 }
 
 /** 一時ファイル置き場。合成したWAVとプロセスIDの記録をここに置く。 */

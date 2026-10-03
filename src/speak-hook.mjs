@@ -56,10 +56,14 @@ function buildStopSpeech(payload, config) {
   const lines = fs.readFileSync(transcriptPath, 'utf8').split('\n');
   const response = extractFinalAssistantText(lines);
 
-  // サマリ節だけを読む設定でも、節が無い応答(短い返答や質問への回答)は
+  // サマリ見出しが無い応答(短い返答や質問への回答)は、
   // 黙ってしまうと不便なので応答全体に戻す。
-  const body =
-    config.readScope === 'summary' ? extractSummarySection(response) || response : response;
+  let body = response;
+  if (config.readScope !== 'full') {
+    body =
+      extractSummarySection(response, { includeFollowing: config.readScope === 'closing' }) ||
+      response;
+  }
 
   return toSpeakableText(body, { maxChars: config.maxChars });
 }
