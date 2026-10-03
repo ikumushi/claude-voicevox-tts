@@ -96,6 +96,63 @@ npm run speakers
 
 登録したら Claude Code を再起動する(Hook の設定は起動時に読まれる)。
 
+## 設定の変え方
+
+設定はすべて `~/.claude/settings.json`(= `C:\Users\<ユーザー名>\.claude\settings.json`)の
+`env` ブロックに書く。このプロジェクトのファイルは触らなくてよい。
+
+```json
+{
+  "env": {
+    "VOICEVOX_READ_SCOPE": "closing",
+    "VOICEVOX_SPEAKER": "2",
+    "VOICEVOX_SPEED": "1.2",
+    "VOICEVOX_MAX_CHARS": "800"
+  }
+}
+```
+
+**値はすべて文字列(ダブルクォート付き)で書く。** 数値をそのまま書くと読み込まれない。
+
+**再起動は不要。** `env` の変更は保存した時点で次のターンから反映される(実測確認済み)。
+ただし `hooks` ブロック自体を書き換えたときは Claude Code の再起動が確実。
+
+### やりたいことから引く
+
+| やりたいこと               | 変える値                                                 |
+| -------------------------- | -------------------------------------------------------- |
+| しばらく黙らせたい         | `VOICEVOX_ENABLED` を `"0"`(戻すときは `"1"` か行を削除) |
+| 読み上げを短くしたい       | `VOICEVOX_READ_SCOPE` を `"summary"`(まとめ節だけ)       |
+| もっと短くしたい           | `VOICEVOX_SPEED` を `"1.5"` まで上げる                   |
+| 応答を全部読ませたい       | `VOICEVOX_READ_SCOPE` を `"full"`                        |
+| 声を変えたい               | `npm run speakers` でID確認 → `VOICEVOX_SPEAKER`         |
+| 声が小さい・大きい         | `VOICEVOX_VOLUME`(`"0.7"` 〜 `"1.5"` あたり)             |
+| 許可待ちの通知だけ止めたい | `VOICEVOX_SPEAK_NOTIFICATIONS` を `"0"`                  |
+| 棒読みに感じる             | `VOICEVOX_INTONATION` を `"1.2"` 前後に上げる            |
+
+**`VOICEVOX_MAX_CHARS` は安易に下げない。** 打ち切りは末尾から起きるので、
+下げると一番聞きたい「次にできること・作業依頼」が消える。
+短くしたいときは `VOICEVOX_READ_SCOPE` か `VOICEVOX_SPEED` で調整する。
+
+### 変更が効いたか確かめる
+
+```powershell
+Set-Location C:\dev\Claude_Projects\claude-voicevox-tts
+npm run status
+npm run speak -- "設定を変えました"
+```
+
+`npm run status` は `~/.claude/settings.json` を直接読んで実際に使われる値を表示する。
+意図した値になっていなければ `settings.json` の書き方(クォート忘れ・カンマ)を疑う。
+
+```
+話者ID  : 2
+速度    : 1.2
+読む範囲: closing
+上限    : 800文字
+設定ファイル: C:\Users\<ユーザー名>\.claude\settings.json
+```
+
 ## 設定(環境変数)
 
 | 変数                              | 既定値                   | 意味                                             |

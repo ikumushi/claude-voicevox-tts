@@ -59,3 +59,14 @@ Hook は Claude Code から `node <ファイル>` で直接呼ばれる。ビル
 見出しの判定を変えるときは `test/section.test.mjs` に期待する切り出し結果を書いてから直す。
 実データでは1応答が複数のテキストブロックに分割されて記録されるため、
 節の切り出しは必ず `extractFinalAssistantText` で連結したあとに行う。
+
+## 設定の読み込み経路に注意
+
+Hook は Claude Code の子プロセスなので `~/.claude/settings.json` の `env` が
+環境変数として渡ってくる(変更は再起動なしで次のターンから効く。実測確認済み)。
+一方ユーザーが自分のターミナルで CLI を叩くと環境変数は渡ってこない。
+そのため `loadConfig` は `effectiveEnv()` 経由で settings.json を下敷きに読む。
+この仕組みが無いと `npm run status` が既定値を表示して実際の設定と食い違う。
+
+settings.json には APIトークンなど無関係な秘密情報も入る。
+`readVoicevoxEnv` は `VOICEVOX_` で始まるキーだけを拾う。この絞り込みを外さない。

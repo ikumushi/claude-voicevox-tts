@@ -1,12 +1,17 @@
 /**
- * 環境変数から設定を読む。
+ * 設定を読む。
  *
  * Hookは `~/.claude/settings.json` の `env` 経由で環境変数を受け取るので、
  * 設定ファイルを別に持たずに環境変数だけで完結させている。
+ * ただし自分のターミナルからCLIを叩いたときは環境変数が渡ってこないため、
+ * settings.json を直接読んで下敷きにする(`effectiveEnv`)。
+ * これが無いと `npm run status` が既定値を表示して実際の設定と食い違う。
  */
 
 import os from 'node:os';
 import path from 'node:path';
+
+import { effectiveEnv } from './claude-settings.mjs';
 
 /** VOICEVOX ENGINE の既定の待ち受け先。 */
 const DEFAULT_URL = 'http://127.0.0.1:50021';
@@ -99,7 +104,7 @@ export function workDir(env = process.env) {
   return path.join(env.CLAUDE_VOICEVOX_TMP ?? os.tmpdir(), 'claude-voicevox');
 }
 
-export function loadConfig(env = process.env) {
+export function loadConfig(env = effectiveEnv()) {
   return {
     enabled: readBoolean(env.VOICEVOX_ENABLED, true),
     url: (env.VOICEVOX_URL ?? DEFAULT_URL).replace(/\/+$/, ''),

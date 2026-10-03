@@ -9,6 +9,7 @@
 
 import fs from 'node:fs';
 
+import { claudeSettingsPath } from './claude-settings.mjs';
 import { loadConfig } from './config.mjs';
 import {
   ensureEngineRunning,
@@ -31,9 +32,11 @@ async function printStatus(config) {
   console.log(`状態    : ${version ? `起動中 (v${version})` : '応答なし'}`);
   console.log(`話者ID  : ${config.speaker}`);
   console.log(`速度    : ${config.speedScale}`);
+  console.log(`読む範囲: ${config.readScope}`);
   console.log(`上限    : ${config.maxChars}文字`);
   console.log(`一時置き場: ${config.workDir}`);
   console.log(`エンジン実体: ${findEngineExe(config) ?? '見つからない'}`);
+  console.log(`設定ファイル: ${claudeSettingsPath()}`);
 }
 
 async function printSpeakers(config) {
