@@ -47,7 +47,8 @@ export async function fetchVersion(config) {
       signal: AbortSignal.timeout(2000),
     });
     if (!response.ok) return null;
-    return (await response.text()).trim();
+    // /version は JSON 文字列("0.25.2")を返すので、前後の引用符を外す。
+    return (await response.text()).trim().replace(/^"|"$/g, '');
   } catch {
     return null;
   }
