@@ -17,7 +17,7 @@ describe('loadConfig', () => {
     expect(config.url).toBe('http://127.0.0.1:50021');
     expect(config.speaker).toBe(3);
     expect(config.speedScale).toBe(1.2);
-    expect(config.maxChars).toBe(150);
+    expect(config.maxChars).toBe(400);
   });
 
   it('環境変数で上書きできる', () => {
@@ -36,7 +36,7 @@ describe('loadConfig', () => {
   it('壊れた値や範囲外の値は既定値に戻す', () => {
     const config = loadConfig({ VOICEVOX_SPEED: 'fast', VOICEVOX_MAX_CHARS: '-5' });
     expect(config.speedScale).toBe(1.2);
-    expect(config.maxChars).toBe(150);
+    expect(config.maxChars).toBe(400);
   });
 
   it('VOICEVOX_ENABLED=0 で無効にできる', () => {

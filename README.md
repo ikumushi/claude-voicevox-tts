@@ -53,7 +53,7 @@ npm run speakers
   "env": {
     "VOICEVOX_SPEAKER": "3",
     "VOICEVOX_SPEED": "1.2",
-    "VOICEVOX_MAX_CHARS": "150"
+    "VOICEVOX_MAX_CHARS": "400"
   },
   "hooks": {
     "Stop": [
@@ -94,7 +94,7 @@ npm run speakers
 | `VOICEVOX_PITCH`                  | `0`                      | 声の高さ(-0.15〜0.15)                            |
 | `VOICEVOX_INTONATION`             | `1`                      | 抑揚の強さ(0〜2)                                 |
 | `VOICEVOX_VOLUME`                 | `1`                      | 音量(0〜2)                                       |
-| `VOICEVOX_MAX_CHARS`              | `150`                    | 読み上げる最大文字数。超えたら文末で打ち切る     |
+| `VOICEVOX_MAX_CHARS`              | `400`                    | 読み上げる最大文字数。超えたら文末で打ち切る     |
 | `VOICEVOX_SPEAK_NOTIFICATIONS`    | `1`                      | 許可待ちなどの通知を読み上げるか                 |
 | `VOICEVOX_URL`                    | `http://127.0.0.1:50021` | エンジンの待ち受け先                             |
 | `VOICEVOX_AUTOSTART`              | `1`                      | エンジンが止まっていたら自動起動するか           |
@@ -111,7 +111,7 @@ npm run speakers
 | `1.2` | 14.7秒  | 22秒    | 59秒    |
 | `1.5` | 11.7秒  | 18秒    | 47秒    |
 
-既定を150文字にしているのはこの実測から。400文字では1ターンに1分近く話し続けてしまう。
+既定は400文字(約59秒)。応答をほぼ全部聞く設定。短くしたいときはこの表を目安に `VOICEVOX_MAX_CHARS` を下げる。
 
 ## 仕組み
 
