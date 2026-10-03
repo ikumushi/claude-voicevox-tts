@@ -6,6 +6,7 @@
   "description": "Claude Code の応答を VOICEVOX で読み上げる Hook",
   "scripts": {
     "prepare": "husky",
+    "gui": "node src/gui-server.mjs",
     "speak": "node src/cli.mjs",
     "speakers": "node src/cli.mjs --speakers",
     "status": "node src/cli.mjs --status",

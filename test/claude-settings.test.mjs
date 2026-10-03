@@ -53,6 +53,14 @@ describe('readVoicevoxEnv', () => {
     expect(readVoicevoxEnv(file)).toEqual({});
   });
 
+  /** 一時ファイル置き場だけ接頭辞が CLAUDE_VOICEVOX_ なので、こちらも拾う必要がある。 */
+  it('CLAUDE_VOICEVOX_ で始まるキーも拾う', () => {
+    const file = writeSettings(
+      JSON.stringify({ env: { CLAUDE_VOICEVOX_TMP: 'D:/tmp', CLAUDE_CODE_OTHER: 'x' } }),
+    );
+    expect(readVoicevoxEnv(file)).toEqual({ CLAUDE_VOICEVOX_TMP: 'D:/tmp' });
+  });
+
   it('文字列でない値は無視する', () => {
     const file = writeSettings(JSON.stringify({ env: { VOICEVOX_SPEED: 1.5 } }));
     expect(readVoicevoxEnv(file)).toEqual({});

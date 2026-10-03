@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VOICEVOX 読み上げ設定</title>
+    <style>
+      :root {
+        --bg: #16181d;
+        --panel: #1e2128;
+        --panel-2: #262a33;
+        --line: #343a46;
+        --text: #e6e8ec;
+        --muted: #9aa2b1;
+        --accent: #6aa9ff;
+        --ok: #4fbf7b;
+        --warn: #e0a33e;
+        --bad: #e8646a;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 24px 16px 96px;
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Segoe UI', 'Yu Gothic UI', system-ui, sans-serif;
+        font-size: 15px;
+        line-height: 1.7;
+      }
+      .wrap {
+        max-width: 880px;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: 22px;
+        margin: 0 0 4px;
+      }
+      .sub {
+        color: var(--muted);
+        font-size: 13px;
+        margin-bottom: 20px;
+      }
+      .sub code {
+        background: var(--panel-2);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 12px;
+      }
+      .status {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 18px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 12px 16px;
+        margin-bottom: 20px;
+        font-size: 13px;
+      }
+      .dot {
+        display: inline-block;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        margin-right: 6px;
+        vertical-align: 1px;
+      }
+      .dot.on {
+        background: var(--ok);
+      }
+      .dot.off {
+        background: var(--bad);
+      }
+      section {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 18px 20px 6px;
+        margin-bottom: 18px;
+      }
+      section > h2 {
+        font-size: 16px;
+        margin: 0 0 2px;
+      }
+      section > .desc {
+        color: var(--muted);
+        font-size: 13px;
+        margin: 0 0 14px;
+      }
+      .field {
+        padding: 14px 0;
+        border-top: 1px solid var(--line);
+      }
+      .field:first-of-type {
+        border-top: none;
+      }
+      .field-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .field-head label {
+        font-weight: 600;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 12px;
+        white-space: nowrap;
+      }
+      .help {
+        color: var(--muted);
+        font-size: 12.5px;
+        margin-top: 4px;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 8px;
+        flex-wrap: wrap;
+      }
+      input[type='range'] {
+        flex: 1 1 220px;
+        min-width: 180px;
+        accent-color: var(--accent);
+      }
+      input[type='text'],
+      input[type='number'],
+      select {
+        background: var(--panel-2);
+        color: var(--text);
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        padding: 7px 10px;
+        font-size: 14px;
+        font-family: inherit;
+      }
+      input[type='number'] {
+        width: 110px;
+      }
+      input[type='text'] {
+        flex: 1 1 320px;
+      }
+      select {
+        flex: 1 1 260px;
+      }
+      input.invalid,
+      select.invalid {
+        border-color: var(--bad);
+      }
+      .error {
+        color: var(--bad);
+        font-size: 12.5px;
+        margin-top: 6px;
+      }
+      .toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        cursor: pointer;
+        user-select: none;
+      }
+      .toggle input {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--accent);
+      }
+      button {
+        background: var(--panel-2);
+        color: var(--text);
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        padding: 7px 14px;
+        font-size: 13.5px;
+        font-family: inherit;
+        cursor: pointer;
+      }
+      button:hover:not(:disabled) {
+        border-color: var(--accent);
+      }
+      button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      button.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #0d1117;
+        font-weight: 600;
+      }
+      button.link {
+        background: none;
+        border: none;
+        color: var(--accent);
+        padding: 0 2px;
+        font-size: 12px;
+      }
+      .estimate {
+        background: var(--panel-2);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin: 4px 0 14px;
+        font-size: 13px;
+      }
+      .estimate b {
+        color: var(--accent);
+      }
+      .bar {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--panel);
+        border-top: 1px solid var(--line);
+        padding: 12px 16px;
+      }
+      .bar-inner {
+        max-width: 880px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .bar .msg {
+        flex: 1 1 240px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .bar .msg.ok {
+        color: var(--ok);
+      }
+      .bar .msg.bad {
+        color: var(--bad);
+      }
+      .changes {
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin-bottom: 14px;
+        font-size: 13px;
+      }
+      .changes ul {
+        margin: 6px 0 0;
+        padding-left: 20px;
+      }
+      .changes code {
+        font-size: 12px;
+      }
+      .trial {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-top: 10px;
+      }
+      .note {
+        color: var(--muted);
+        font-size: 12.5px;
+        border-left: 3px solid var(--line);
+        padding-left: 12px;
+        margin: 14px 0 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>VOICEVOX 読み上げ設定</h1>
+      <p class="sub">
+        変更すると <code id="settings-path">settings.json</code> の
+        <code>env</code> だけを書き換えます。Hook の登録や他のツールの設定には触りません。 保存は
+        Claude Code の再起動なしで、次のターンから効きます。
+      </p>
+
+      <div class="status" id="status"></div>
+
+      <div id="groups"></div>
+
+      <section>
+        <h2>試聴</h2>
+        <p class="desc">保存する前に、いまの画面の値で1回だけ鳴らして確かめられます。</p>
+        <div class="trial">
+          <input
+            type="text"
+            id="trial-text"
+            value="設定の確認です。この速さと声で読み上げます。"
+            maxlength="300"
+          />
+          <button id="trial-btn">この設定で聞く</button>
+        </div>
+        <p class="note">
+          鳴らす前に、前の読み上げが残っていれば止めます。エンジンが起動していない場合は
+          自動で起動するため、初回は少し待つことがあります。
+        </p>
+      </section>
+
+      <section>
+        <h2>元に戻す</h2>
+        <p class="desc">
+          保存するたびに、直前の内容を
+          <code>settings.json.voicevox-backup</code> に取っています。1つ前の状態に戻せます。
+        </p>
+        <button id="restore-btn">直前の保存を取り消す</button>
+      </section>
+    </div>
+
+    <div class="bar">
+      <div class="bar-inner">
+        <span class="msg" id="message">読み込み中…</span>
+        <button id="reset-btn">変更を破棄</button>
+        <button class="primary" id="save-btn" disabled>保存する</button>
+      </div>
+    </div>
+
+    <script>
+      const TOKEN = '__TOKEN__';
+
+      /** 実測: 速度1.2で1文字あたり約147ミリ秒。速度に反比例する。 */
+      const MS_PER_CHAR_AT_1_2 = 147;
+
+      let state = null;
+      /** 画面上の値(すべて文字列)。 */
+      let values = {};
+      /** 保存済みの値。差分表示と「変更を破棄」に使う。 */
+      let saved = {};
+      const errors = {};
+      let speakers = null;
+
+      async function api(path, options = {}) {
+        const response = await fetch(path, {
+          ...options,
+          headers: { 'content-type': 'application/json', 'x-voicevox-token': TOKEN },
+        });
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          const error = new Error(body.message || `通信に失敗しました (${response.status})`);
+          error.fieldErrors = body.fieldErrors;
+          throw error;
+        }
+        return body;
+      }
+
+      function setMessage(text, kind = '') {
+        const node = document.getElementById('message');
+        node.textContent = text;
+        node.className = `msg ${kind}`;
+      }
+
+      function paramOf(key) {
+        return state.params.find((param) => param.key === key);
+      }
+
+      /** 画面に出す現在値。settings.json に無ければ既定値。 */
+      function initialValue(param) {
+        return state.stored[param.key] ?? param.defaultValue;
+      }
+
+      function rangeText(param) {
+        if (param.type === 'number') {
+          const min = param.min ?? '';
+          const max = param.max ?? '';
+          return `${min}〜${max}${param.unit ? ' ' + param.unit : ''} / 既定 ${param.defaultValue}`;
+        }
+        if (param.type === 'boolean') return `既定 ${param.defaultValue === '1' ? 'オン' : 'オフ'}`;
+        if (param.defaultValue === '') return '既定 なし';
+        return `既定 ${param.defaultValue}`;
+      }
+
+      /** 値を検証する。サーバ側の validateValue と同じ規則。 */
+      function validate(param, raw) {
+        const text = String(raw ?? '').trim();
+        if (param.type === 'number') {
+          if (text === '') return null;
+          const value = Number(text);
+          if (!Number.isFinite(value)) return `数値を入れてください(入力: ${text})`;
+          if (param.integer && !Number.isInteger(value)) return `整数を入れてください`;
+          if (param.min !== undefined && value < param.min)
+            return `${param.min} 以上にしてください`;
+          if (param.max !== undefined && value > param.max)
+            return `${param.max} 以下にしてください`;
+          return null;
+        }
+        if (param.key === 'VOICEVOX_URL' && text !== '') {
+          try {
+            const url = new URL(text);
+            if (!['http:', 'https:'].includes(url.protocol)) return 'http か https にしてください';
+          } catch {
+            return 'http://ホスト:ポート の形で入れてください';
+          }
+        }
+        return null;
+      }
+
+      function onChange(key, raw) {
+        values[key] = String(raw);
+        const message = validate(paramOf(key), raw);
+        if (message) errors[key] = message;
+        else delete errors[key];
+        render();
+      }
+
+      function changeList() {
+        return Object.keys(values)
+          .filter((key) => (values[key] ?? '') !== (saved[key] ?? ''))
+          .map((key) => ({ key, from: saved[key] ?? '', to: values[key] ?? '' }));
+      }
+
+      /** 実測: 既定の読み上げ範囲(closing)は1応答あたり520〜600文字だった。 */
+      const TYPICAL_CHARS = 560;
+
+      /** 指定の文字数を読むのにかかる秒数。速度に反比例する。 */
+      function secondsFor(chars) {
+        const speed = Number(values.VOICEVOX_SPEED || 1.2);
+        if (!Number.isFinite(chars) || !Number.isFinite(speed) || speed <= 0) return null;
+        return Math.round((chars * MS_PER_CHAR_AT_1_2 * (1.2 / speed)) / 1000);
+      }
+
+      /**
+       * 読み上げ時間の見積り。
+       * 上限いっぱいの最悪値だけ出すと実際よりずっと長く見えるので、
+       * 実測の典型値(約560文字)と両方を出す。
+       */
+      function estimateText() {
+        const limit = Number(values.VOICEVOX_MAX_CHARS || 800);
+        const typical = secondsFor(Math.min(TYPICAL_CHARS, limit));
+        const worst = secondsFor(limit);
+        if (typical === null || worst === null) return '読み上げ時間を計算できません。';
+
+        const scope = values.VOICEVOX_READ_SCOPE;
+        if (scope === 'full') {
+          return `応答全体を読む設定です。上限いっぱいで <b>約${worst}秒</b>。長い応答ではほぼ毎回この長さになります。`;
+        }
+        const truncated =
+          limit < TYPICAL_CHARS
+            ? ' <b>上限が実測値より短いため、末尾の作業依頼が切れます。</b>'
+            : '';
+        return `ふだんは <b>約${typical}秒</b>、上限いっぱいなら <b>約${worst}秒</b>(実測: 速度1.2で1文字あたり約0.147秒、まとめ以降は520〜600文字)。${truncated}`;
+      }
+
+      function field(param) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'field';
+
+        const head = document.createElement('div');
+        head.className = 'field-head';
+        const label = document.createElement('label');
+        label.textContent = param.label;
+        const meta = document.createElement('span');
+        meta.className = 'meta';
+        meta.textContent = rangeText(param);
+        head.append(label, meta);
+        wrapper.append(head);
+
+        const row = document.createElement('div');
+        row.className = 'row';
+        const current = values[param.key] ?? '';
+
+        if (param.type === 'boolean') {
+          const toggle = document.createElement('label');
+          toggle.className = 'toggle';
+          const box = document.createElement('input');
+          box.type = 'checkbox';
+          box.checked = current !== '0';
+          box.onchange = () => onChange(param.key, box.checked ? '1' : '0');
+          const text = document.createElement('span');
+          text.textContent = box.checked ? 'オン' : 'オフ';
+          toggle.append(box, text);
+          row.append(toggle);
+        } else if (param.type === 'enum') {
+          const select = document.createElement('select');
+          for (const choice of param.choices) {
+            const option = document.createElement('option');
+            option.value = choice.value;
+            option.textContent = choice.label;
+            option.selected = choice.value === current;
+            select.append(option);
+          }
+          select.onchange = () => onChange(param.key, select.value);
+          row.append(select);
+
+          const chosen = param.choices.find((choice) => choice.value === current);
+          if (chosen) {
+            const hint = document.createElement('div');
+            hint.className = 'help';
+            hint.textContent = chosen.help;
+            hint.style.flex = '1 1 100%';
+            row.append(hint);
+          }
+        } else if (param.type === 'number') {
+          if (param.speakerPicker) {
+            const select = document.createElement('select');
+            if (speakers === null) {
+              const option = document.createElement('option');
+              option.textContent = 'エンジンから一覧を取得中…';
+              select.append(option);
+              select.disabled = true;
+            } else if (speakers.length === 0) {
+              const option = document.createElement('option');
+              option.textContent = '一覧を取れませんでした(IDを直接入力してください)';
+              select.append(option);
+              select.disabled = true;
+            } else {
+              for (const speaker of speakers) {
+                const option = document.createElement('option');
+                option.value = String(speaker.id);
+                option.textContent = `${speaker.id}: ${speaker.label}`;
+                option.selected = String(speaker.id) === current;
+                select.append(option);
+              }
+              select.onchange = () => onChange(param.key, select.value);
+            }
+            row.append(select);
+          } else {
+            const slider = document.createElement('input');
+            slider.type = 'range';
+            slider.min = param.min;
+            slider.max = param.max;
+            slider.step = param.step ?? 1;
+            slider.value = current;
+            slider.oninput = () => onChange(param.key, slider.value);
+            row.append(slider);
+          }
+
+          const number = document.createElement('input');
+          number.type = 'number';
+          number.value = current;
+          if (param.min !== undefined) number.min = param.min;
+          if (param.max !== undefined) number.max = param.max;
+          number.step = param.step ?? 1;
+          if (errors[param.key]) number.className = 'invalid';
+          number.onchange = () => onChange(param.key, number.value);
+          row.append(number);
+          if (param.unit) {
+            const unit = document.createElement('span');
+            unit.className = 'meta';
+            unit.textContent = param.unit;
+            row.append(unit);
+          }
+        } else {
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.value = current;
+          input.placeholder = param.placeholder ?? '';
+          if (errors[param.key]) input.className = 'invalid';
+          input.onchange = () => onChange(param.key, input.value);
+          row.append(input);
+        }
+
+        if ((values[param.key] ?? '') !== param.defaultValue) {
+          const reset = document.createElement('button');
+          reset.className = 'link';
+          reset.textContent = '既定値に戻す';
+          reset.onclick = () => onChange(param.key, param.defaultValue);
+          row.append(reset);
+        }
+        wrapper.append(row);
+
+        if (errors[param.key]) {
+          const error = document.createElement('div');
+          error.className = 'error';
+          error.textContent = errors[param.key];
+          wrapper.append(error);
+        }
+
+        const help = document.createElement('div');
+        help.className = 'help';
+        help.textContent = param.help;
+        wrapper.append(help);
+
+        return wrapper;
+      }
+
+      function renderStatus() {
+        const node = document.getElementById('status');
+        const engine = state.engine;
+        node.innerHTML = '';
+
+        const items = [
+          `<span><span class="dot ${engine.running ? 'on' : 'off'}"></span>エンジン: ${
+            engine.running ? `起動中 (v${engine.version})` : '停止中'
+          }</span>`,
+          `<span>待ち受け: ${engine.url}</span>`,
+          `<span><span class="dot ${state.effective.enabled ? 'on' : 'off'}"></span>読み上げ: ${
+            state.effective.enabled ? '有効' : '無効'
+          }</span>`,
+        ];
+        if (!engine.exe) {
+          items.push(
+            '<span style="color:var(--warn)">エンジンの実行ファイルが見つかりません</span>',
+          );
+        }
+        node.innerHTML = items.join('');
+      }
+
+      function renderChanges() {
+        const list = changeList();
+        const existing = document.getElementById('changes');
+        if (existing) existing.remove();
+        if (list.length === 0) return;
+
+        const box = document.createElement('div');
+        box.className = 'changes';
+        box.id = 'changes';
+        const items = list
+          .map((change) => {
+            const from = change.from === '' ? '(未設定)' : change.from;
+            const to = change.to === '' ? '(未設定に戻す)' : change.to;
+            const param = paramOf(change.key);
+            return `<li>${param.label}: <code>${from}</code> → <code>${to}</code></li>`;
+          })
+          .join('');
+        box.innerHTML = `<b>保存すると次が変わります(${list.length}件)</b><ul>${items}</ul>`;
+        document.getElementById('groups').prepend(box);
+      }
+
+      function render() {
+        document.getElementById('settings-path').textContent = state.settingsFile;
+        renderStatus();
+
+        const container = document.getElementById('groups');
+        container.innerHTML = '';
+
+        for (const group of state.groups) {
+          const section = document.createElement('section');
+          const title = document.createElement('h2');
+          title.textContent = group.label;
+          const desc = document.createElement('p');
+          desc.className = 'desc';
+          desc.textContent = group.description;
+          section.append(title, desc);
+
+          if (group.id === 'content') {
+            const estimate = document.createElement('div');
+            estimate.className = 'estimate';
+            estimate.innerHTML = estimateText();
+            section.append(estimate);
+          }
+
+          for (const param of state.params.filter((item) => item.group === group.id)) {
+            section.append(field(param));
+          }
+          container.append(section);
+        }
+
+        renderChanges();
+
+        const invalid = Object.keys(errors).length > 0;
+        const changed = changeList().length > 0;
+        document.getElementById('save-btn').disabled = invalid || !changed;
+        document.getElementById('reset-btn').disabled = !changed;
+        document.getElementById('restore-btn').disabled = !state.hasBackup;
+
+        if (invalid) setMessage('範囲外の値があります。直すと保存できます。', 'bad');
+        else if (changed) setMessage(`未保存の変更が ${changeList().length} 件あります。`);
+        else setMessage('保存済みの状態です。');
+      }
+
+      function applyState(next) {
+        state = next;
+        saved = {};
+        values = {};
+        for (const param of state.params) {
+          const value = initialValue(param);
+          saved[param.key] = value;
+          values[param.key] = value;
+        }
+        for (const key of Object.keys(errors)) delete errors[key];
+      }
+
+      async function loadSpeakers() {
+        try {
+          const body = await api('/api/speakers');
+          speakers = body.speakers;
+        } catch {
+          speakers = [];
+        }
+        render();
+      }
+
+      document.getElementById('save-btn').onclick = async () => {
+        const button = document.getElementById('save-btn');
+        button.disabled = true;
+        setMessage('保存しています…');
+        try {
+          const result = await api('/api/save', {
+            method: 'POST',
+            body: JSON.stringify({ values }),
+          });
+          applyState(result.state);
+          render();
+          setMessage(
+            result.changes.length === 0
+              ? '変更はありませんでした。'
+              : `保存しました(${result.changes.length}件)。次のターンから効きます。`,
+            'ok',
+          );
+        } catch (error) {
+          if (error.fieldErrors) Object.assign(errors, error.fieldErrors);
+          render();
+          setMessage(error.message, 'bad');
+        }
+      };
+
+      document.getElementById('reset-btn').onclick = () => {
+        values = { ...saved };
+        for (const key of Object.keys(errors)) delete errors[key];
+        render();
+        setMessage('変更を破棄しました。');
+      };
+
+      document.getElementById('restore-btn').onclick = async () => {
+        if (!window.confirm('直前の保存を取り消して、1つ前の設定に戻します。よろしいですか?'))
+          return;
+        try {
+          const result = await api('/api/restore', { method: 'POST' });
+          applyState(result.state);
+          render();
+          setMessage('1つ前の設定に戻しました。', 'ok');
+        } catch (error) {
+          setMessage(error.message, 'bad');
+        }
+      };
+
+      document.getElementById('trial-btn').onclick = async () => {
+        const button = document.getElementById('trial-btn');
+        const text = document.getElementById('trial-text').value;
+        button.disabled = true;
+        setMessage('合成しています…');
+        try {
+          await api('/api/preview', { method: 'POST', body: JSON.stringify({ values, text }) });
+          setMessage('再生し終わりました。', 'ok');
+        } catch (error) {
+          if (error.fieldErrors) Object.assign(errors, error.fieldErrors);
+          render();
+          setMessage(error.message, 'bad');
+        } finally {
+          button.disabled = false;
+        }
+      };
+
+      (async () => {
+        try {
+          applyState(await api('/api/state'));
+          render();
+          loadSpeakers();
+        } catch (error) {
+          setMessage(error.message, 'bad');
+        }
+      })();
+    </script>
+  </body>
+</html>
