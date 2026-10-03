@@ -101,6 +101,13 @@ npm run speakers
 設定はすべて `~/.claude/settings.json`(= `C:\Users\<ユーザー名>\.claude\settings.json`)の
 `env` ブロックに書く。このプロジェクトのファイルは触らなくてよい。
 
+`~` はホームフォルダの意味。`.claude` は先頭がドットなのでエクスプローラーでは
+隠しフォルダ扱いで見えない。開くときはパスを直接指定する。
+
+```powershell
+notepad "$env:USERPROFILE\.claude\settings.json"
+```
+
 ```json
 {
   "env": {
